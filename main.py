@@ -17,7 +17,9 @@ for photo in os.listdir(trainphotos_dir):
 
 
 class NN:
-    def __init__(self, inputnodes, hiddennodes, hiddennodes_2, outputnodes, learningrate, epochs):
+    def __init__(
+        self, inputnodes, hiddennodes, hiddennodes_2, outputnodes, learningrate, epochs
+    ):
         self.inodes = inputnodes
         self.hnodes = hiddennodes
         self.hnodes2 = hiddennodes_2
@@ -59,7 +61,7 @@ class NN:
                 # Создаем матрицу из входных значений
                 inputs_array = numpy.array([colors], float).T
 
-                # Получаем название фото 
+                # Получаем название фото
                 photo_name = photo.split(".png")[0]
 
                 # Получаем правильный ответ
@@ -70,9 +72,7 @@ class NN:
                         true_answer.append(0)
 
                 # Создаем матрицу желаемых ответов
-                target = numpy.array(
-                    [true_answer], float
-                ).T
+                target = numpy.array([true_answer], float).T
 
                 # Ужножаем матрицу входных значений на веса
                 hidden_inputs = numpy.dot(self.weights_inhi, inputs_array)
@@ -140,7 +140,8 @@ class NN:
         for output in final_outputs:
             if output >= 0.8:
                 print()
-            number+=1
+            number += 1
+
 
 # Настройки сети
 inputnodes = 64
@@ -155,12 +156,13 @@ network.train()
 
 # Функция назначения правильного ответа в случае ошибки нейронной сети
 def setTrueAnswer():
-    like_answer = input("Введите правильный ответ: ").replace(" ", '')
+    like_answer = input("Введите правильный ответ: ").replace(" ", "")
 
     if 0 < int(like_answer) < 9:
         like_answer = setTrueAnswer()
 
     return like_answer
+
 
 while True:
     # Запускаем сканирование изображения
@@ -177,6 +179,7 @@ while True:
         # Копируем фото в папку с тренировочными файлами
         shutil.copy((path + "photo.png"), trainphotos_dir)
         # Переименовываем это фото для дальнейшего обучения сети
-        os.rename((trainphotos_dir + "photo.png"), (trainphotos_dir + setTrueAnswer() + "_" + str(numberOfTrainPhotos + 1)))
-
-    
+        os.rename(
+            (trainphotos_dir + "photo.png"),
+            (trainphotos_dir + setTrueAnswer() + "_" + str(numberOfTrainPhotos + 1)),
+        )
