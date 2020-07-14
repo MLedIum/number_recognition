@@ -13,6 +13,7 @@ path = os.getcwd() + "\\"
 # И директорию с тренировочными фото
 trainphotos_dir = path + "trainphotos\\"
 
+
 class NN:
     def __init__(
         self, inputnodes, hiddennodes, hiddennodes_2, outputnodes, learningrate, epochs
@@ -25,9 +26,15 @@ class NN:
         self.epochs = epochs
 
         # Генерируем случайные значения весов
-        self.weights_inhi = numpy.random.normal(0.0, pow(self.inodes, -0.5), (self.hnodes, self.inodes))
-        self.weights_hihi = numpy.random.normal(0.0, pow(self.hnodes, -0.5), (self.hnodes2, self.hnodes))
-        self.weights_hiout = numpy.random.normal(0.0, pow(self.hnodes2, -0.5), (self.onodes, self.hnodes2))
+        self.weights_inhi = numpy.random.normal(
+            0.0, pow(self.inodes, -0.5), (self.hnodes, self.inodes)
+        )
+        self.weights_hihi = numpy.random.normal(
+            0.0, pow(self.hnodes, -0.5), (self.hnodes2, self.hnodes)
+        )
+        self.weights_hiout = numpy.random.normal(
+            0.0, pow(self.hnodes2, -0.5), (self.onodes, self.hnodes2)
+        )
 
         # Функция активации
         self.activation_function = lambda x: scipy.special.expit(x)
@@ -98,7 +105,7 @@ class NN:
                     numpy.transpose(hidden2_outputs),
                 )
 
-                #print(hidden_outputs)
+                # print(hidden_outputs)
                 # print(self.lr * numpy.dot((output_errors * final_outputs * (1.0 - final_outputs)),numpy.transpose(hidden2_outputs)))
 
                 self.weights_hihi += self.lr * numpy.dot(
@@ -145,10 +152,9 @@ class NN:
                 mansw = answ
                 ntansm = nansw
             nansw += 1
-        
-        print()
-        print('Ответ: ' + str(ntansm))
 
+        print()
+        print("Ответ: " + str(ntansm))
 
 
 # Настройки сети
@@ -166,7 +172,7 @@ network.train()
 def setTrueAnswer():
     like_answer = input("Введите правильный ответ: ").replace(" ", "")
 
-    if (-1 < int(like_answer) < 10):
+    if -1 < int(like_answer) < 10:
         pass
     else:
         like_answer = setTrueAnswer()
@@ -191,7 +197,13 @@ while True:
         # Переименовываем это фото для дальнейшего обучения сети
         os.rename(
             (trainphotos_dir + "photo.png"),
-            (trainphotos_dir + setTrueAnswer() + "_" + str(numberOfTrainPhotos + 1) + '.png'),
+            (
+                trainphotos_dir
+                + setTrueAnswer()
+                + "_"
+                + str(numberOfTrainPhotos + 1)
+                + ".png"
+            ),
         )
-    elif question == 't' or question == 'train':
+    elif question == "t" or question == "train":
         network.train()
