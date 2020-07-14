@@ -1,20 +1,17 @@
 from PIL import Image
+import random
 import os
 import numpy
 import shutil
+import scipy.special
 
 # Задаем переменные
 width = height = 8
-train_photos = list()
 
 # Получаем текущую директорию
 path = os.getcwd() + "\\"
 # И директорию с тренировочными фото
 trainphotos_dir = path + "trainphotos\\"
-
-for photo in os.listdir(trainphotos_dir):
-    train_photos.append(trainphotos_dir + photo)
-
 
 class NN:
     def __init__(
@@ -28,12 +25,12 @@ class NN:
         self.epochs = epochs
 
         # Генерируем случайные значения весов
-        self.weights_inhi = numpy.random.rand(hiddennodes, inputnodes)
-        self.weights_hihi = numpy.random.rand(hiddennodes_2, hiddennodes)
-        self.weights_hiout = numpy.random.rand(outputnodes, hiddennodes_2)
+        self.weights_inhi = numpy.random.normal(0.0, pow(self.inodes, -0.5), (self.hnodes, self.inodes))
+        self.weights_hihi = numpy.random.normal(0.0, pow(self.hnodes, -0.5), (self.hnodes2, self.hnodes))
+        self.weights_hiout = numpy.random.normal(0.0, pow(self.hnodes2, -0.5), (self.onodes, self.hnodes2))
 
         # Функция активации
-        self.activation_function = lambda x: 1 / (1 + numpy.exp(-x))
+        self.activation_function = lambda x: scipy.special.expit(x)
 
     def train(self):
         epoch_n = 0
@@ -47,7 +44,8 @@ class NN:
             for photo in os.listdir(trainphotos_dir):
 
                 # Опустошаем массивы
-                colors = true_answer = list()
+                colors = list()
+                true_answer = list()
 
                 # Загружаем фотографию
                 pix = Image.open(trainphotos_dir + photo).load()
@@ -66,10 +64,10 @@ class NN:
 
                 # Получаем правильный ответ
                 for answers in range(10):
-                    if answers == photo_name.split("_")[0]:
-                        true_answer.append(1)
+                    if answers == int(photo_name.split("_")[0]):
+                        true_answer.append(1.0)
                     else:
-                        true_answer.append(0)
+                        true_answer.append(0.0)
 
                 # Создаем матрицу желаемых ответов
                 target = numpy.array([true_answer], float).T
@@ -92,13 +90,17 @@ class NN:
                 # Высчитываем ошибки
                 output_errors = target - final_outputs
                 hidden2_errors = numpy.dot(self.weights_hiout.T, output_errors)
-                hidden_errors = numpy.dot(self.weights_hihi.T, output_errors)
+                hidden_errors = numpy.dot(self.weights_hihi.T, hidden2_errors)
 
                 # Изменяем веса
                 self.weights_hiout += self.lr * numpy.dot(
                     (output_errors * final_outputs * (1.0 - final_outputs)),
                     numpy.transpose(hidden2_outputs),
                 )
+
+                #print(hidden_outputs)
+                # print(self.lr * numpy.dot((output_errors * final_outputs * (1.0 - final_outputs)),numpy.transpose(hidden2_outputs)))
+
                 self.weights_hihi += self.lr * numpy.dot(
                     (hidden2_errors * hidden2_outputs * (1.0 - hidden2_outputs)),
                     numpy.transpose(hidden_outputs),
@@ -135,21 +137,27 @@ class NN:
         final_inputs = numpy.dot(self.weights_hiout, hidden2_outputs)
         final_outputs = self.activation_function(final_inputs)
 
-        number = 0
+        mansw = 0
+        nansw = 0
+        ntansm = 0
+        for answ in final_outputs:
+            if answ > mansw:
+                mansw = answ
+                ntansm = nansw
+            nansw += 1
+        
+        print()
+        print('Ответ: ' + str(ntansm))
 
-        for output in final_outputs:
-            if output >= 0.8:
-                print()
-            number += 1
 
 
 # Настройки сети
 inputnodes = 64
-hiddennodes = 192
-hiddennodes_2 = 48
+hiddennodes = 256
+hiddennodes_2 = 128
 outputnodes = 10
-learningrate = 0.3
-epochs = 1000
+learningrate = 0.1
+epochs = 1500
 
 network = NN(inputnodes, hiddennodes, hiddennodes_2, outputnodes, learningrate, epochs)
 network.train()
@@ -158,7 +166,9 @@ network.train()
 def setTrueAnswer():
     like_answer = input("Введите правильный ответ: ").replace(" ", "")
 
-    if 0 < int(like_answer) < 9:
+    if (-1 < int(like_answer) < 10):
+        pass
+    else:
         like_answer = setTrueAnswer()
 
     return like_answer
@@ -166,7 +176,7 @@ def setTrueAnswer():
 
 while True:
     # Запускаем сканирование изображения
-    input("Нажмите Enter для сканирования photo.png")
+    input("Нажмите Enter для сканирования photo.png  ")
     network.query()
 
     # Узнаем правильный ли ответ
@@ -181,5 +191,7 @@ while True:
         # Переименовываем это фото для дальнейшего обучения сети
         os.rename(
             (trainphotos_dir + "photo.png"),
-            (trainphotos_dir + setTrueAnswer() + "_" + str(numberOfTrainPhotos + 1)),
+            (trainphotos_dir + setTrueAnswer() + "_" + str(numberOfTrainPhotos + 1) + '.png'),
         )
+    elif question == 't' or question == 'train':
+        network.train()
