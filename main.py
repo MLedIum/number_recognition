@@ -9,7 +9,7 @@ import scipy.special
 width = height = 8
 
 # Получаем текущую директорию
-path = os.getcwd() + "\\"
+path = os.path.dirname(os.path.abspath(__file__)) + "\\"
 # И директорию с тренировочными фото
 trainphotos_dir = path + "trainphotos\\"
 
